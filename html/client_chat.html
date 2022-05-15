@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Login Client</title>
+    </head>
+    <body>
+    <p>Barebone client. Use python's simple-websocket.</p>
+	<br>
+	<label id="response">Waiting for server response...</label>
+	<br>
+	<input type="text" name="fname" id="message"/>
+	<input type="button" value="Send" id="send_btn" />
+	<br>
+	<label>Chat area</label><br>
+	<textarea id="chat" rows="8" cols="64" ></textarea>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js" integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA==" crossorigin="anonymous" ></script>
+	<script type="text/javascript" charset="utf-8">
+		var socket = io();
+		var SID = null;
+		
+		socket.on('response_fail', function() {
+			console.log("Fail received.")
+			document.getElementById("response").innerHTML  = "Wrong format. Set name with format `name: XXXXXX`";
+		});
+		
+		socket.on('response_good', function(data) {
+			console.log("Good data: " + data)
+			SID = data['sid'];
+			document.getElementById("response").innerHTML  = "Name `" + data['name'] + "` had been set. You can now send messages.";
+		});
+		
+		socket.on('broadcast', function(data) {
+			if(data['sid'] != SID) {
+				// broadcasted by somebody else, print to 
+				document.getElementById("chat").innerHTML += data['msg'] + '\n';
+			}
+		});
+		
+		var send_btn = document.getElementById("send_btn");
+		send_btn.addEventListener("click", function (){
+			var data = document.getElementById("message").value;
+			console.log(data)
+			socket.emit('send', data);
+		}, false);
+	</script>
+    </body>
+</html>

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Login Client</title>
+    </head>
+    <body>
+    <p>Barebone client. Use python's simple-websocket.</p>
+	<br>
+	<label id="response">Submit username & password... </label>
+	<br>
+	<label> Username: </label>
+	<input type="text" id="username"/>
+	<label> Password: </label>
+	<input type="text" id="password"/>
+	<br>
+	<input type="button" value="Submit" id="send_btn" />
+	<script type="text/javascript" charset="utf-8">
+		send_btn.addEventListener("click", function (){
+			var username = document.getElementById("username").value;
+			var password = document.getElementById("password").value;
+			var data = JSON.stringify({"username": username, "password": password });
+			console.log(data);
+			/*$.ajax({
+				type: "POST",
+				url: "/auth",
+				data: JSON.stringify({"username": username, "password": password }),
+				contentType: "application/json; charset=utf-8",
+				dataType: "json",
+				success: function (response) {
+					console.log("Response: ", response.text)
+				}, error: function (err) {
+					console.error(err);
+				}
+			});*/
+			fetch("/auth", {
+				method:"POST",
+				headers: {
+				  'Accept': 'application/json',
+				  'Content-Type': 'application/json'
+				},
+				body: data
+				}).then(result => result.json()).then(result => {
+					// do something with the result
+					var resp = result;
+					console.log("Completed with result:", resp.found);
+					if(resp.found){
+						document.getElementById("response").innerHTML = "Correct Username & Password!"
+					} else {
+						document.getElementById("response").innerHTML = "Wrong Username and/or Password. Submit again."
+					}
+				}).catch(err => {
+					// if any error occured, then catch it here
+					console.error(err);
+				});
+		}, false);
+
+	</script>
+    </body>
+</html>
